@@ -1,0 +1,31 @@
+:root {
+  /* App */
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --text: #0b1222;
+  --muted: #475569;
+  --radius: 14px;
+  --shadow: 0 10px 20px rgba(0, 0, 0, 0.09);
+  --border: #e5e7eb;
+
+  /* Accent */
+  --accent: #3b82f6;
+
+  /* Charts */
+  --chart-accent: var(--accent);
+  --chart-accent-fill: rgba(59, 130, 246, 0.45);
+  --chart-grid: rgba(0, 0, 0, 0.18);
+  --chart-tooltip-bg: rgba(17, 24, 39, 0.92);
+  --chart-tooltip-border: rgba(255, 255, 255, 0.5);
+  --chart-tooltip-text: #ffffff;
+}
+
+/* Smooth UI transitions */
+html,
+body,
+.card,
+.select,
+.btn {
+  transition: background-color 160ms ease, color 160ms ease,
+    border-color 160ms ease, box-shadow 160ms ease;
+}
