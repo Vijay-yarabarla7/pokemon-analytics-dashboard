@@ -5,7 +5,7 @@ import { buildAxes, buildCommonPlugins } from "../../utils/chartConfig";
 
 ensureChartRegistration();
 
-function TypeDistributionChart({ labels = [], data = [] }) {
+function TypeDistributionChart({ labels = [], data = [], onBarClick }) {
   if (!labels.length) return <p>No type data available.</p>;
 
   const chartData = {
@@ -26,6 +26,12 @@ function TypeDistributionChart({ labels = [], data = [] }) {
     responsive: true,
     plugins: buildCommonPlugins("Pokémon by Type"),
     scales: buildAxes(),
+    onClick: (_evt, elements, chart) => {
+      if (!onBarClick || !elements?.length) return;
+      const idx = elements[0].index;
+      const clickedLabel = chart?.data?.labels?.[idx];
+      if (clickedLabel) onBarClick(String(clickedLabel).toLowerCase());
+    },
   };
 
   return <Bar data={chartData} options={options} />;
