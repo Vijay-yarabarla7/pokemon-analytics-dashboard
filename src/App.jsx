@@ -1,9 +1,9 @@
 import "./styles/dashboard.css";
 
-import Header from "../src/layout/Header";
-import Toolbar from "../src/layout/Toolbar";
-import DashboardGrid from "../src/layout/DashboardGrid";
-import Card from "../src/layout/Card";
+import Header from "./components/layout/Header";
+import Toolbar from "./components/layout/Toolbar";
+import DashboardGrid from "./components/layout/DashboardGrid";
+import Card from "./components/layout/Card";
 
 function App() {
   return (
