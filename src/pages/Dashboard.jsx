@@ -6,6 +6,8 @@ import Card from "../components/layout/Card";
 import Spinner from "../components/misc/Spinner";
 import ErrorBlock from "../components/misc/ErrorBlock";
 import EmptyState from "../components/misc/EmptyState";
+import Modal from "../components/misc/Modal";
+import PokemonDetails from "../components/pokemon/PokemonDetails";
 
 import TypeDistributionChart from "../components/charts/TypeDistributionChart";
 import StatsRadarChart from "../components/charts/StatsRadarChart";
@@ -136,6 +138,17 @@ function Dashboard() {
           <div className="dataset-summary">{datasetSummary}</div>
         </Card>
       </DashboardGrid>
+      <Modal
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        title={
+          selectedPokemon?.name
+            ? `${selectedPokemon.name} — Details`
+            : "Details"
+        }
+      >
+        <PokemonDetails pokemon={selectedPokemon} />
+      </Modal>
     </>
   );
 }
