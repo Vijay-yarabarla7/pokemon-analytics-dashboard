@@ -1,36 +1,41 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
-function JsonPreview({ data, title = "JSON Preview" }) {
-  const [open, setOpen] = useState(false);
+// Collapsible component to preview JSON data
+function JsonPreview({ data }) {
+  // State to toggle collapse open/close
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Memoized pretty-printed JSON string (fallback if invalid)
+  const prettyJson = useMemo(() => {
+    try {
+      return JSON.stringify(data, null, 2);
+    } catch {
+      return "// Unable to render JSON";
+    }
+  }, [data]);
+
+  // If no data, render nothing
+  if (!data) return null;
 
   return (
-    <div style={{ marginTop: 12 }}>
+    <div className="collapse">
+      {/* Collapse header button */}
       <button
-        onClick={() => setOpen((o) => !o)}
-        style={{
-          border: "1px solid #e5e7eb",
-          background: "#f8fafc",
-          padding: "6px 10px",
-          borderRadius: 8,
-          cursor: "pointer",
-        }}
+        type="button"
+        className="collapse-header"
+        onClick={() => setIsOpen((prev) => !prev)} // Toggle collapse state
       >
-        {open ? "Hide" : "Show"} {title}
+        <span className={`caret ${isOpen ? "caret-open" : ""}`} aria-hidden />
+        Filtered dataset JSON
       </button>
-      {open && (
-        <pre
-          style={{
-            marginTop: 8,
-            fontSize: 12,
-            background: "#f1f5f9",
-            padding: 10,
-            borderRadius: 8,
-            maxHeight: 300,
-            overflow: "auto",
-          }}
-        >
-          {JSON.stringify(data, null, 2)}
-        </pre>
+
+      {/* Collapsible body with scrollable JSON preview */}
+      {isOpen && (
+        <div className="collapse-body open">
+          <div className="json-scroll">
+            <pre className="json">{prettyJson}</pre>
+          </div>
+        </div>
       )}
     </div>
   );

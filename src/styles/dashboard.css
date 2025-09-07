@@ -13,16 +13,10 @@ body {
   background: var(--bg);
 }
 
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
 /* Header */
 .header {
   text-align: center;
-  margin: 24px 0 16px;
+  margin: 30px 0 16px;
 }
 .header h1 {
   margin: 0;
@@ -34,16 +28,33 @@ body {
 
 /* Toolbar */
 .toolbar {
-  margin: 12px 0 16px;
+  padding-top: 6px;
+  margin-bottom: 14px;
 }
+
 .toolbar-inner {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 10px 16px;
+  align-items: center;
 }
 
-/* Grid */
+/* Form fields */
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.field-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.select {
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+/* Layout */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -60,48 +71,179 @@ body {
   background: var(--card);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  border: 1px solid var(--border);
   padding: 16px;
 }
 .card-title {
   margin: 0 0 10px 0;
 }
-/* Form fields */
-.field {
-  display: flex;
-  align-items: center;
+
+/* Spinner */
+.spinner-wrapper {
+  display: grid;
+  place-items: center;
   gap: 8px;
 }
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
-.field-label {
-  font-size: 14px;
+/* Error */
+.error-block {
+  text-align: center;
+  background: rgba(239, 68, 68, 0.2);
+  color: #7f1d1d;
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.error-text {
+  margin: 0;
+  font-weight: 600;
+}
+.error-actions {
+  margin-top: 10px;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+.btn:hover {
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.35);
+}
+
+/* JSON block */
+.json {
+  font-size: 12px;
+  line-height: 1.4;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+.modal-panel {
+  width: min(760px, 92vw);
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title {
+  margin: 0;
+}
+.modal-body {
+  padding: 14px;
+}
+
+/* Pokémon details (used in modal) */
+.poke-details__top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.poke-details__img {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* Stats table */
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+.stats-table th,
+.stats-table td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+}
+.stats-value-col {
+  width: 100px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
   color: var(--muted);
 }
 
-.select {
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  font-size: 14px;
+/* Collapsible JSON preview */
+.collapse {
+  margin-top: 1rem;
+}
+.collapse-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
   cursor: pointer;
 }
-
-.select:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.caret {
+  width: 0;
+  height: 0;
+  border-left: 6px solid var(--text);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 0.15s ease;
 }
-
-.btn {
-  padding: 6px 12px;
-  border-radius: 8px;
+.caret-open {
+  transform: rotate(90deg);
+}
+.collapse-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease;
+}
+.collapse-body.open {
+  max-height: 220px;
+}
+.json-scroll {
+  max-height: 200px;
+  overflow: auto;
   border: 1px solid var(--border);
-  background: var(--accent);
-  color: #fff;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.btn:hover {
-  opacity: 0.9;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  margin-top: 8px;
 }
