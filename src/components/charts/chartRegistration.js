@@ -1,4 +1,5 @@
-// Register required Chart.js components once
+// Utility to safely register required Chart.js components once
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,14 +14,16 @@ import {
   Title,
 } from "chart.js";
 
-let isRegistered = false;
+let isRegistered = false; // tracks if Chart.js components have already been registered
 
 function ensureChartRegistration() {
+  // Prevent duplicate registration
   if (isRegistered) return;
+  // Register only once all the scales, elements, and plugins needed across charts
   ChartJS.register(
     CategoryScale,
     LinearScale,
-    RadialLinearScale,
+    RadialLinearScale, // required for radar charts
     PointElement,
     LineElement,
     BarElement,
@@ -29,7 +32,7 @@ function ensureChartRegistration() {
     Legend,
     Title
   );
-  isRegistered = true;
+  isRegistered = true; // mark as registered
 }
 
 export default ensureChartRegistration;

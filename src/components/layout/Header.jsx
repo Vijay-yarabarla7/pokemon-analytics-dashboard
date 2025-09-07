@@ -1,3 +1,4 @@
+// Page header component for the dashboard
 function Header() {
   return (
     <header className="header">

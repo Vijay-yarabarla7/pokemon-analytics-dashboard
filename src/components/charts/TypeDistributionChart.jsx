@@ -1,12 +1,22 @@
-import React from "react";
+// Bar chart showing counts per Pokémon type with clickable bars for filtering
 import { Bar } from "react-chartjs-2";
 import ensureChartRegistration from "./chartRegistration";
-import { buildAxes, buildCommonPlugins } from "../../utils/chartConfig";
+import {
+  readCssVar,
+  buildAxes,
+  buildCommonPlugins,
+} from "../../utils/chartConfig";
 
+// Ensure Chart.js components are registered once before any chart renders
 ensureChartRegistration();
 
 function TypeDistributionChart({ labels = [], data = [], onBarClick }) {
+  // To avoid rendering an empty chart; show a friendly message instead
   if (!labels.length) return <p>No type data available.</p>;
+
+  // Pull palette from CSS variables
+  const accent = readCssVar("--chart-accent");
+  const accentFill = readCssVar("--chart-accent-fill");
 
   const chartData = {
     labels,
@@ -14,27 +24,37 @@ function TypeDistributionChart({ labels = [], data = [], onBarClick }) {
       {
         label: "Count by Type",
         data,
-        backgroundColor: "rgba(59, 130, 246, 0.45)",
-        borderColor: "rgba(59, 130, 246, 1)",
+        backgroundColor: accentFill,
+        borderColor: accent,
         borderWidth: 2,
-        borderRadius: 6,
+        borderRadius: 8,
+        barPercentage: 0.82,
+        categoryPercentage: 0.78,
+        hoverBorderColor: accent,
+        hoverBorderWidth: 2,
       },
     ],
   };
 
+  // Shared plugins, axes, quick animation, and click → filter
   const options = {
     responsive: true,
-    plugins: buildCommonPlugins("Pokémon by Type"),
+    maintainAspectRatio: false,
+    plugins: buildCommonPlugins("Pokémon Type Distribution"),
     scales: buildAxes(),
-    onClick: (_evt, elements, chart) => {
+    animation: { duration: 250 },
+    onClick: (evt, elements) => {
       if (!onBarClick || !elements?.length) return;
-      const idx = elements[0].index;
-      const clickedLabel = chart?.data?.labels?.[idx];
-      if (clickedLabel) onBarClick(String(clickedLabel).toLowerCase());
+      const index = elements[0].index;
+      const clickedLabel = labels[index];
+      if (clickedLabel) onBarClick(clickedLabel.toLowerCase());
     },
   };
 
-  return <Bar data={chartData} options={options} />;
+  return (
+    <div style={{ height: 360 }}>
+      <Bar data={chartData} options={options} />
+    </div>
+  );
 }
-
 export default TypeDistributionChart;

@@ -1,34 +1,56 @@
-import React from "react";
+// For visualizing Pokémon stats
+
 import { Radar } from "react-chartjs-2";
 import ensureChartRegistration from "./chartRegistration";
-import { buildRadarScale, buildCommonPlugins } from "../../utils/chartConfig";
+import {
+  readCssVar,
+  buildRadarScale,
+  buildCommonPlugins,
+} from "../../utils/chartConfig";
 
+// Ensure required Chart.js components are registered once before rendering
 ensureChartRegistration();
 
-function StatsRadarChart({ labels = [], data = [], name }) {
+function StatsRadarChart({ labels = [], data = [], title = "Stats" }) {
+  // If no labels, render a fallback message instead of an empty chart
   if (!labels.length) return <p>No stats available.</p>;
+
+  // Pull chart accent colors from CSS variables
+  const accent = readCssVar("--chart-accent");
+  const accentFill = readCssVar("--chart-accent-fill");
 
   const chartData = {
     labels,
     datasets: [
       {
-        label: name || "Pokémon",
+        label: title,
         data,
-        backgroundColor: "rgba(59, 130, 246, 0.35)",
-        borderColor: "rgba(59, 130, 246, 1)",
         borderWidth: 2,
-        pointBackgroundColor: "rgba(59, 130, 246, 1)",
+        borderColor: accent,
+        backgroundColor: accentFill,
+        pointBackgroundColor: accent,
+        pointBorderColor: accent,
+        pointRadius: 3,
+        pointHoverRadius: 4,
+        fill: true,
       },
     ],
   };
 
+  // Chart.js options for responsiveness, plugins, and radar-specific scaling
   const options = {
     responsive: true,
-    plugins: buildCommonPlugins("Stats Radar"),
+    maintainAspectRatio: false,
+    plugins: buildCommonPlugins(title), // shared plugin config (title, legend, etc.)
     scales: buildRadarScale(),
+    animation: { duration: 250 },
   };
 
-  return <Radar data={chartData} options={options} />;
+  // Container ensures fixed height for consistent layout
+  return (
+    <div style={{ height: 340 }}>
+      <Radar data={chartData} options={options} />
+    </div>
+  );
 }
-
 export default StatsRadarChart;

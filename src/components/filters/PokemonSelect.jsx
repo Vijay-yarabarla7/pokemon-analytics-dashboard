@@ -1,10 +1,13 @@
+// Dropdown component to select a Pokémon from the provided options
+
 function PokemonSelect({
-  options = [],
+  options = [], // List of options to show in dropdown (default: empty array)
   value = "",
   onChange,
-  id = "pokemon-select",
+  id = "pokemon-select", // ID to link label and select
   label = "Select Pokémon:",
 }) {
+  // Disable dropdown if there are no options
   const isDisabled = options.length === 0;
 
   return (
@@ -12,6 +15,7 @@ function PokemonSelect({
       <label htmlFor={id} className="field-label">
         {label}
       </label>
+      {/* Select element for choosing a Pokémon */}
       <select
         id={id}
         value={value}
@@ -20,6 +24,7 @@ function PokemonSelect({
         disabled={isDisabled}
         aria-disabled={isDisabled}
       >
+        {/* Show message if no options are available */}
         {isDisabled ? (
           <option value="">No options</option>
         ) : (

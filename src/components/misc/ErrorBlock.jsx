@@ -1,4 +1,4 @@
-import React from "react";
+// Component to display an error message with an optional retry action
 
 function ErrorBlock({ message, onRetry }) {
   return (

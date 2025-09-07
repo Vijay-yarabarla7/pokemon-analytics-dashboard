@@ -1,4 +1,4 @@
-import React from "react";
+// Component to display a message when no data is available
 
 function EmptyState({ title = "No data", subtitle }) {
   return (
