@@ -16,18 +16,60 @@ import {
   filterByType,
 } from "../utils/dataTransformers";
 
-import TypeFilter from "../components/filters/TypeFilter";
-import PokemonSelect from "../components/filters/PokemonSelect";
-import ViewDetailsButton from "../components/actions/ViewDetailsButton";
-
 function Dashboard() {
   const { data: all, loading, error, reload } = usePokemonData(20);
 
   // --- Filters / selection state ---
   const [selectedType, setSelectedType] = useState("all");
   const [selectedName, setSelectedName] = useState("");
-  const [detailsOpen, setDetailsOpen] = useState(false); // will be used in Commit 9
+  const [detailsOpen, setDetailsOpen] = useState(false); // used in next commit
 
+  // --- Hooks must run on every render (even during loading/error) ---
+  const typeOptions = useMemo(
+    () => (loading || error ? [] : getAllTypes(all)),
+    [all, loading, error]
+  );
+
+  const filtered = useMemo(
+    () => (loading || error ? [] : filterByType(all, selectedType)),
+    [all, selectedType, loading, error]
+  );
+
+  const pokemonOptions = useMemo(
+    () =>
+      filtered.map((p) => ({
+        value: p.name.toLowerCase(),
+        label: p.name.charAt(0).toUpperCase() + p.name.slice(1),
+      })),
+    [filtered]
+  );
+
+  const selectedPokemon =
+    (selectedName &&
+      filtered.find((p) => p.name.toLowerCase() === selectedName)) ||
+    (filtered.length ? filtered[0] : null);
+
+  const typeChart = useMemo(
+    () =>
+      filtered.length
+        ? getTypeDistribution(filtered)
+        : { labels: [], data: [] },
+    [filtered]
+  );
+
+  const radar = useMemo(
+    () =>
+      selectedPokemon
+        ? getRadarStats(selectedPokemon)
+        : { labels: [], data: [] },
+    [selectedPokemon]
+  );
+
+  const datasetSummary = `Loaded ${filtered.length} Pokémon${
+    selectedType !== "all" ? ` (type: ${selectedType})` : ""
+  }`;
+
+  // --- Rendering (now it’s safe to early-return) ---
   if (loading) {
     return (
       <Card title="Loading">
@@ -44,45 +86,8 @@ function Dashboard() {
     );
   }
 
-  // Build type options once data is available
-  const typeOptions = useMemo(() => getAllTypes(all), [all]);
-
-  // Filter list by selected type
-  const filtered = useMemo(
-    () => filterByType(all, selectedType),
-    [all, selectedType]
-  );
-
-  // Build Pokémon dropdown options from filtered list
-  const pokemonOptions = useMemo(
-    () =>
-      filtered.map((p) => ({
-        value: p.name.toLowerCase(),
-        label: p.name.charAt(0).toUpperCase() + p.name.slice(1),
-      })),
-    [filtered]
-  );
-
-  // Determine selected Pokémon (by name) or fallback to first filtered
-  const selectedPokemon =
-    (selectedName &&
-      filtered.find((p) => p.name.toLowerCase() === selectedName)) ||
-    (filtered.length ? filtered[0] : null);
-
-  // Chart data
-  const typeChart = useMemo(() => getTypeDistribution(filtered), [filtered]);
-  const radar = useMemo(
-    () => getRadarStats(selectedPokemon),
-    [selectedPokemon]
-  );
-
-  const datasetSummary = `Loaded ${filtered.length} Pokémon${
-    selectedType !== "all" ? ` (type: ${selectedType})` : ""
-  }`;
-
   return (
     <>
-      {/* Toolbar with filters and details button */}
       <div className="toolbar">
         <div className="toolbar-inner">
           <TypeFilter
@@ -90,7 +95,7 @@ function Dashboard() {
             value={selectedType}
             onChange={(v) => {
               setSelectedType(v);
-              setSelectedName(""); // reset selection when type changes
+              setSelectedName("");
             }}
           />
           <PokemonSelect
@@ -134,5 +139,9 @@ function Dashboard() {
     </>
   );
 }
+
+import TypeFilter from "../components/filters/TypeFilter";
+import PokemonSelect from "../components/filters/PokemonSelect";
+import ViewDetailsButton from "../components/actions/ViewDetailsButton";
 
 export default Dashboard;
