@@ -1,92 +1,56 @@
-import React from "react";
-
-function Pill({ children }) {
-  return (
-    <span
-      style={{
-        display: "inline-block",
-        padding: "2px 8px",
-        borderRadius: 999,
-        border: "1px solid #e5e7eb",
-        background: "#f8fafc",
-        marginRight: 6,
-        marginBottom: 6,
-        fontSize: 12,
-      }}
-    >
-      {children}
-    </span>
-  );
-}
-
-function Row({ label, value }) {
-  return (
-    <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
-      <div style={{ width: 120, color: "var(--muted)" }}>{label}</div>
-      <div style={{ fontWeight: 600 }}>{value}</div>
-    </div>
-  );
-}
-
+// To display detailed information of a selected Pokémon
 function PokemonDetails({ pokemon }) {
-  if (!pokemon) return null;
+  // If no Pokémon is selected, show fallback message
+  if (!pokemon) return <p>No Pokémon selected.</p>;
 
-  const img =
+  // Determine which sprite (image) to display:
+  // 1. Prefer official artwork
+  // 2. Fallback to default front sprite
+  // 3. If none available, use an empty string
+  const sprite =
     pokemon?.sprites?.other?.["official-artwork"]?.front_default ||
-    pokemon?.sprites?.front_default;
+    pokemon?.sprites?.front_default ||
+    "";
+
+  // Normalize and prepare stats data for display
+  // Each stat has: UPPERCASE name + numeric value (or 0 if missing)
+  const stats = (pokemon.stats || []).map((statObj) => ({
+    name: (statObj?.stat?.name || "-").toUpperCase(),
+    value: statObj?.base_stat ?? 0,
+  }));
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: 16 }}>
-      <div style={{ display: "grid", placeItems: "center" }}>
-        {img ? (
-          <img src={img} alt={pokemon.name} width={140} height={140} />
-        ) : (
-          <div
-            style={{
-              width: 140,
-              height: 140,
-              background: "#f1f5f9",
-              borderRadius: 12,
-              display: "grid",
-              placeItems: "center",
-              color: "var(--muted)",
-            }}
-          >
-            No image
-          </div>
-        )}
-      </div>
-
-      <div>
-        <Row label="Name" value={pokemon.name} />
-        <Row label="ID" value={`#${pokemon.id}`} />
-        <Row
-          label="Types"
-          value={
-            <span>
-              {(pokemon.types || []).map((t) => (
-                <Pill key={t.slot || t.type?.name}>{t.type?.name}</Pill>
-              ))}
-            </span>
-          }
-        />
-        <Row
-          label="Height / Weight"
-          value={`${pokemon.height ?? "?"} / ${pokemon.weight ?? "?"}`}
-        />
-
-        <div style={{ marginTop: 12 }}>
-          <div style={{ color: "var(--muted)", marginBottom: 6 }}>
-            Base Stats
-          </div>
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
-            {(pokemon.stats || []).map((s) => (
-              <li key={s.stat?.name}>
-                <strong>{s.stat?.name}:</strong> {s.base_stat}
-              </li>
-            ))}
-          </ul>
+    <div className="poke-details">
+      {/* Render Pokémon image if sprite is available */}
+      {sprite && (
+        <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+          <img
+            className="poke-details__img"
+            src={sprite}
+            alt={pokemon.name}
+            style={{ width: 180, height: 180, objectFit: "contain" }}
+          />
         </div>
+      )}
+
+      {/* Render Pokémon stats in a table format */}
+      <div className="poke-details__stats">
+        <table className="stats-table">
+          <thead>
+            <tr>
+              <th>Stat</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stats.map((stat) => (
+              <tr key={stat.name}>
+                <td>{stat.name}</td>
+                <td>{stat.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

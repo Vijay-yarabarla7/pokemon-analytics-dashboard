@@ -12,12 +12,15 @@ ensureChartRegistration();
 
 function TypeDistributionChart({ labels = [], data = [], onBarClick }) {
   // To avoid rendering an empty chart; show a friendly message instead
-  if (!labels.length) return <p>No type data available.</p>;
+  if (!labels.length) {
+    return <p>No type data available.</p>;
+  }
 
   // Pull palette from CSS variables
   const accent = readCssVar("--chart-accent");
   const accentFill = readCssVar("--chart-accent-fill");
 
+  // Chart.js dataset config for bar chart
   const chartData = {
     labels,
     datasets: [
@@ -57,4 +60,5 @@ function TypeDistributionChart({ labels = [], data = [], onBarClick }) {
     </div>
   );
 }
+
 export default TypeDistributionChart;

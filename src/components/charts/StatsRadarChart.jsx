@@ -1,11 +1,10 @@
 // For visualizing Pokémon stats
-
 import { Radar } from "react-chartjs-2";
 import ensureChartRegistration from "./chartRegistration";
 import {
   readCssVar,
-  buildRadarScale,
   buildCommonPlugins,
+  buildRadarScale,
 } from "../../utils/chartConfig";
 
 // Ensure required Chart.js components are registered once before rendering
@@ -13,12 +12,15 @@ ensureChartRegistration();
 
 function StatsRadarChart({ labels = [], data = [], title = "Stats" }) {
   // If no labels, render a fallback message instead of an empty chart
-  if (!labels.length) return <p>No stats available.</p>;
+  if (!labels.length) {
+    return <p>No stats to display.</p>;
+  }
 
   // Pull chart accent colors from CSS variables
   const accent = readCssVar("--chart-accent");
   const accentFill = readCssVar("--chart-accent-fill");
 
+  // Chart.js dataset configuration
   const chartData = {
     labels,
     datasets: [
@@ -53,4 +55,5 @@ function StatsRadarChart({ labels = [], data = [], title = "Stats" }) {
     </div>
   );
 }
+
 export default StatsRadarChart;

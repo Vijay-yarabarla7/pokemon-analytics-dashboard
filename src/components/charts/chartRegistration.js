@@ -19,6 +19,7 @@ let isRegistered = false; // tracks if Chart.js components have already been reg
 function ensureChartRegistration() {
   // Prevent duplicate registration
   if (isRegistered) return;
+
   // Register only once all the scales, elements, and plugins needed across charts
   ChartJS.register(
     CategoryScale,
@@ -32,6 +33,7 @@ function ensureChartRegistration() {
     Legend,
     Title
   );
+
   isRegistered = true; // mark as registered
 }
 
