@@ -7,6 +7,10 @@ import Spinner from "../components/misc/Spinner";
 import ErrorBlock from "../components/misc/ErrorBlock";
 import EmptyState from "../components/misc/EmptyState";
 
+import TypeDistributionChart from "../components/charts/TypeDistributionChart";
+import StatsRadarChart from "../components/charts/StatsRadarChart";
+import { getTypeDistribution, getRadarStats } from "../utils/dataTransformers";
+
 function Dashboard() {
   const { data, loading, error, reload } = usePokemonData(20);
 
@@ -29,11 +33,19 @@ function Dashboard() {
   return (
     <DashboardGrid>
       <Card title="Type Distribution">
-        <EmptyState title="No data to display" />
+        {data.length > 0 ? (
+          <TypeDistributionChart {...getTypeDistribution(data)} />
+        ) : (
+          <EmptyState title="No type data" />
+        )}
       </Card>
 
       <Card title="Stats Radar">
-        <EmptyState title="No data to display" />
+        {data.length > 0 ? (
+          <StatsRadarChart {...getRadarStats(data[0])} name={data[0].name} />
+        ) : (
+          <EmptyState title="No stats data" />
+        )}
       </Card>
 
       <Card title="Dataset">
