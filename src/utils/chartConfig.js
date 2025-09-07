@@ -1,4 +1,4 @@
-// Read a CSS custom property from :root
+// Read a CSS custom property from :root and return a trimmed string
 function readCssVar(name) {
   const value = getComputedStyle(document.documentElement).getPropertyValue(
     name
@@ -6,7 +6,7 @@ function readCssVar(name) {
   return (value && value.trim()) || "";
 }
 
-// Common plugins for Chart.js
+// Common plugins: title, legend, tooltip — all styled via CSS vars.
 function buildCommonPlugins(titleText) {
   const textColor = readCssVar("--text");
   const tooltipBg = readCssVar("--chart-tooltip-bg");
@@ -42,10 +42,11 @@ function buildCommonPlugins(titleText) {
   };
 }
 
-// Cartesian axes (for bar/line charts)
+// Cartesian axes (bar/line) with themed ticks and grid.
 function buildAxes() {
   const textColor = readCssVar("--text");
   const gridColor = readCssVar("--chart-grid");
+
   return {
     x: {
       grid: { color: "transparent" },
@@ -59,10 +60,11 @@ function buildAxes() {
   };
 }
 
-// Radar scale
+// Radar scale (for radar charts) with themed ticks, grid, and labels.
 function buildRadarScale() {
   const textColor = readCssVar("--text");
   const gridColor = readCssVar("--chart-grid");
+
   return {
     r: {
       beginAtZero: true,

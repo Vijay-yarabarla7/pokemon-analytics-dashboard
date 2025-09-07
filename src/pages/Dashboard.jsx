@@ -1,162 +1,196 @@
-import React, { useMemo, useState } from "react";
-import usePokemonData from "../hooks/usePokemonData";
+import { useState, useMemo } from "react";
 
-import DashboardGrid from "../components/layout/DashboardGrid";
+// Layout components
+import Header from "../components/layout/Header";
+import Toolbar from "../components/layout/Toolbar";
 import Card from "../components/layout/Card";
-import Spinner from "../components/misc/Spinner";
-import ErrorBlock from "../components/misc/ErrorBlock";
-import EmptyState from "../components/misc/EmptyState";
-import Modal from "../components/misc/Modal";
-import PokemonDetails from "../components/pokemon/PokemonDetails";
-import JsonPreview from "../components/misc/JsonPreview";
+import DashboardGrid from "../components/layout/DashboardGrid";
 
+// Filters
+import TypeFilter from "../components/filters/TypeFilter";
+import PokemonSelect from "../components/filters/PokemonSelect";
+
+// Charts
 import TypeDistributionChart from "../components/charts/TypeDistributionChart";
 import StatsRadarChart from "../components/charts/StatsRadarChart";
+
+// Misc UI (feedback, utilities, modal, details)
+import Spinner from "../components/misc/Spinner";
+import ErrorBlock from "../components/misc/ErrorBlock";
+import JsonPreview from "../components/misc/JsonPreview";
+import Modal from "../components/misc/Modal";
+import PokemonDetails from "../components/pokemon/PokemonDetails";
+import ViewDetailsButton from "../components/actions/ViewDetailsButton";
+
+// Data: custom hook + transformers
+import usePokemonData from "../hooks/usePokemonData";
 import {
+  filterByType,
+  getAllTypes,
   getTypeDistribution,
   getRadarStats,
-  getAllTypes,
-  filterByType,
 } from "../utils/dataTransformers";
 
+// Small helpers
+import titleCase from "../utils/formatters";
+import compactPokemonList from "../utils/jsonHelpers";
+
 function Dashboard() {
-  const { data: all, loading, error, reload } = usePokemonData(20);
+  // Fetch Pokémon dataset (first 20 with details) via custom hook.
+  const { data: allPokemon, loading, error, reload } = usePokemonData(20);
 
-  // --- Filters / selection state ---
-  const [selectedType, setSelectedType] = useState("all");
-  const [selectedName, setSelectedName] = useState("");
-  const [detailsOpen, setDetailsOpen] = useState(false); // used in next commit
+  // Local UI state
+  const [selectedType, setSelectedType] = useState("all"); // active type filter
+  const [selectedPokemonName, setSelectedPokemonName] = useState(""); // dropdown selection
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // modal toggle
 
-  // --- Hooks must run on every render (even during loading/error) ---
-  const typeOptions = useMemo(
-    () => (loading || error ? [] : getAllTypes(all)),
-    [all, loading, error]
+  // Build available type filter options from dataset.
+  // Memoized to avoid recomputing when data hasn’t changed.
+  const typeOptions = useMemo(() => getAllTypes(allPokemon), [allPokemon]);
+
+  // Filter dataset by currently selected type.
+  // Memoized to avoid unnecessary recalculations on every render.
+  const filteredPokemon = useMemo(
+    () => filterByType(allPokemon, selectedType),
+    [allPokemon, selectedType]
   );
 
-  const filtered = useMemo(
-    () => (loading || error ? [] : filterByType(all, selectedType)),
-    [all, selectedType, loading, error]
-  );
+  // Identify currently selected Pokémon.
+  // If none selected, fall back to the first in the filtered list.
+  let selectedPokemon = null;
+  if (filteredPokemon.length) {
+    const pokemonByName =
+      selectedPokemonName &&
+      filteredPokemon.find(
+        (pokemon) => pokemon?.name?.toLowerCase() === selectedPokemonName
+      );
+    selectedPokemon = pokemonByName || filteredPokemon[0];
+  }
 
+  // Transform filtered list into dropdown options.
+  // Memoized for stable props → prevents unnecessary re-renders in PokemonSelect.
   const pokemonOptions = useMemo(
     () =>
-      filtered.map((p) => ({
-        value: p.name.toLowerCase(),
-        label: p.name.charAt(0).toUpperCase() + p.name.slice(1),
+      filteredPokemon.map((pokemon) => ({
+        value: pokemon.name.toLowerCase(),
+        label: titleCase(pokemon.name),
       })),
-    [filtered]
+    [filteredPokemon]
   );
 
-  const selectedPokemon =
-    (selectedName &&
-      filtered.find((p) => p.name.toLowerCase() === selectedName)) ||
-    (filtered.length ? filtered[0] : null);
-
-  const typeChart = useMemo(
-    () =>
-      filtered.length
-        ? getTypeDistribution(filtered)
-        : { labels: [], data: [] },
-    [filtered]
+  // Prepare chart data for type distribution.
+  // Memoized since chart libraries benefit from stable data references.
+  const typeChartData = useMemo(
+    () => getTypeDistribution(filteredPokemon),
+    [filteredPokemon]
   );
 
-  const radar = useMemo(
-    () =>
-      selectedPokemon
-        ? getRadarStats(selectedPokemon)
-        : { labels: [], data: [] },
+  // Prepare chart data for selected Pokémon stats.
+  // Memoized to avoid recalculating unless selection changes.
+  const radarChartData = useMemo(
+    () => getRadarStats(selectedPokemon),
     [selectedPokemon]
   );
 
-  const datasetSummary = `Loaded ${filtered.length} Pokémon${
-    selectedType !== "all" ? ` (type: ${selectedType})` : ""
-  }`;
-
-  // --- Rendering (now it’s safe to early-return) ---
+  // Loading / error states
   if (loading) {
     return (
-      <Card title="Loading">
-        <Spinner />
-      </Card>
+      <div className="container">
+        <Header />
+        <Spinner /> {/* spinner while fetching data */}
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Card title="Error">
+      <div className="container">
+        <Header />
+        {/* Error block provides retry option via reload() */}
         <ErrorBlock message={error} onRetry={reload} />
-      </Card>
+      </div>
     );
   }
 
+  // ----- Handlers -----
+  function handleTypeChange(newTypeValue) {
+    setSelectedType(newTypeValue);
+    setSelectedPokemonName(""); // reset dropdown when type changes
+  }
+
+  function handlePokemonChange(newPokemonName) {
+    setSelectedPokemonName(newPokemonName);
+  }
+
+  function handleTypeBarClick(lowercaseTypeLabel) {
+    handleTypeChange(lowercaseTypeLabel);
+  }
+
+  // Dataset summary string displayed in Dataset card
+  const datasetSummary = `Loaded ${filteredPokemon.length} Pokémon${
+    selectedType !== "all" ? ` (type: ${selectedType})` : ""
+  }.`;
+
+  // ----- Render -----
   return (
-    <>
-      <div className="toolbar">
-        <div className="toolbar-inner">
-          <TypeFilter
-            options={typeOptions}
-            value={selectedType}
-            onChange={(v) => {
-              setSelectedType(v);
-              setSelectedName("");
-            }}
-          />
-          <PokemonSelect
-            options={pokemonOptions}
-            value={selectedPokemon?.name?.toLowerCase() || ""}
-            onChange={setSelectedName}
-          />
-          <ViewDetailsButton onClick={() => setDetailsOpen(true)} />
-        </div>
-      </div>
+    <main className="container" role="main">
+      <Header />
+
+      {/* Toolbar contains filters, dropdown, and actions */}
+      <Toolbar>
+        <TypeFilter
+          options={typeOptions}
+          value={selectedType}
+          onChange={handleTypeChange}
+        />
+
+        <PokemonSelect
+          options={pokemonOptions}
+          value={selectedPokemon?.name?.toLowerCase() || ""}
+          onChange={handlePokemonChange}
+        />
+
+        <ViewDetailsButton onClick={() => setIsDetailsModalOpen(true)} />
+      </Toolbar>
 
       <DashboardGrid>
+        {/* Type distribution chart card */}
         <Card title="Type Distribution">
-          {typeChart.labels.length ? (
-            <TypeDistributionChart
-              labels={typeChart.labels}
-              data={typeChart.data}
-              onBarClick={(lower) => setSelectedType(lower)}
-            />
-          ) : (
-            <EmptyState title="No type data" />
-          )}
+          <TypeDistributionChart
+            labels={typeChartData.labels}
+            data={typeChartData.data}
+            onBarClick={handleTypeBarClick}
+          />
         </Card>
-
+        {/* Stats radar chart card */}
         <Card title="Stats Radar">
-          {radar.labels.length ? (
-            <StatsRadarChart
-              labels={radar.labels}
-              data={radar.data}
-              name={selectedPokemon?.name}
-            />
-          ) : (
-            <EmptyState title="No stats data" />
-          )}
+          <StatsRadarChart
+            labels={radarChartData.labels}
+            data={radarChartData.data}
+            title={
+              selectedPokemon
+                ? `${titleCase(selectedPokemon.name)} Stats`
+                : "Stats"
+            }
+          />
         </Card>
-
+        {/* Dataset overview card */}
         <Card title="Dataset">
-          <div className="dataset-summary">{datasetSummary}</div>
-          <JsonPreview data={filtered.slice(0, 3)} title="Sample Data" />
+          <p className="dataset-summary">{datasetSummary}</p>
+          <JsonPreview data={compactPokemonList(filteredPokemon)} />
         </Card>
       </DashboardGrid>
+
+      {/* Modal with Pokémon details */}
       <Modal
-        open={detailsOpen}
-        onClose={() => setDetailsOpen(false)}
-        title={
-          selectedPokemon?.name
-            ? `${selectedPokemon.name} — Details`
-            : "Details"
-        }
+        open={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        title={selectedPokemon ? titleCase(selectedPokemon.name) : "Pokémon"}
       >
         <PokemonDetails pokemon={selectedPokemon} />
       </Modal>
-    </>
+    </main>
   );
 }
-
-import TypeFilter from "../components/filters/TypeFilter";
-import PokemonSelect from "../components/filters/PokemonSelect";
-import ViewDetailsButton from "../components/actions/ViewDetailsButton";
 
 export default Dashboard;

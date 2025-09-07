@@ -1,13 +1,15 @@
-// Simple caching using localStorage with TTL support
-
+//functions for simple caching in localStorage.
 // --- Retrieve from cache ---
 function cacheGet(cacheKey) {
   try {
+    // Get raw string from localStorage
     const rawValue = localStorage.getItem(cacheKey);
     if (!rawValue) return null;
 
+    // Parse stored JSON → { value, expiresAt }
     const { value, expiresAt } = JSON.parse(rawValue);
 
+    // If expired, remove and return null
     if (expiresAt && expiresAt <= Date.now()) {
       localStorage.removeItem(cacheKey);
       return null;
@@ -21,7 +23,8 @@ function cacheGet(cacheKey) {
 
 // --- Store value in cache with optional TTL ---
 function cacheSet(cacheKey, value, ttlMs = 0) {
-  const expiresAt = ttlMs ? Date.now() + ttlMs : 0;
+  const expiresAt = ttlMs ? Date.now() + ttlMs : 0; // 0 = no expiry
+
   try {
     localStorage.setItem(cacheKey, JSON.stringify({ value, expiresAt }));
   } catch {}
@@ -34,6 +37,7 @@ async function cacheGetOrSet(cacheKey, fetchFunction, ttlMs = 0) {
     return cachedValue;
   }
 
+  // If not cached, fetch new value and save
   const newValue = await fetchFunction();
   cacheSet(cacheKey, newValue, ttlMs);
   return newValue;
@@ -43,12 +47,15 @@ async function cacheGetOrSet(cacheKey, fetchFunction, ttlMs = 0) {
 function cacheClearByPrefix(prefix) {
   try {
     const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const currentKey = localStorage.key(i);
+
+    // Collect keys that match the prefix
+    for (let index = 0; index < localStorage.length; index++) {
+      const currentKey = localStorage.key(index);
       if (currentKey && currentKey.startsWith(prefix)) {
         keysToRemove.push(currentKey);
       }
     }
+
     keysToRemove.forEach((key) => localStorage.removeItem(key));
   } catch {}
 }
