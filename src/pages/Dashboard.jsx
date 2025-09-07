@@ -8,6 +8,7 @@ import ErrorBlock from "../components/misc/ErrorBlock";
 import EmptyState from "../components/misc/EmptyState";
 import Modal from "../components/misc/Modal";
 import PokemonDetails from "../components/pokemon/PokemonDetails";
+import JsonPreview from "../components/misc/JsonPreview";
 
 import TypeDistributionChart from "../components/charts/TypeDistributionChart";
 import StatsRadarChart from "../components/charts/StatsRadarChart";
@@ -136,6 +137,7 @@ function Dashboard() {
 
         <Card title="Dataset">
           <div className="dataset-summary">{datasetSummary}</div>
+          <JsonPreview data={filtered.slice(0, 3)} title="Sample Data" />
         </Card>
       </DashboardGrid>
       <Modal
