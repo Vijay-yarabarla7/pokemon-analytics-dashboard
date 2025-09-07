@@ -1,0 +1,13 @@
+:root {
+  /* App */
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --text: #0b1222;
+  --muted: #475569;
+  --radius: 14px;
+  --shadow: 0 10px 20px rgba(0, 0, 0, 0.09);
+  --border: #e5e7eb;
+
+  /* Accent */
+  --accent: #3b82f6;
+}
